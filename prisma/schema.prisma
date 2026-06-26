@@ -12,7 +12,8 @@ model User {
   email              String   @unique
   googleAccessToken  String?
   googleRefreshToken String?
-  bufferAccessToken  String?
+  linkedinAccessToken String?
+  linkedinUserId     String?
   createdAt          DateTime @default(now())
   drafts             Draft[]
 }

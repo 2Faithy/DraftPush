@@ -32,5 +32,5 @@ export async function GET(request: NextRequest) {
     },
   })
 
-  return NextResponse.redirect(new URL('/dashboard', request.url))
+  return NextResponse.redirect('https://48drdq-3000.csb.app/dashboard')
 }
