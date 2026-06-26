@@ -18,19 +18,28 @@ export async function GET(request: NextRequest) {
 
   const { tokens } = await oauth2Client.getToken(code)
 
-  await prisma.user.upsert({
+  const existingUser = await prisma.user.findUnique({
     where: { clerkId: userId },
-    update: {
-      googleAccessToken: tokens.access_token,
-      googleRefreshToken: tokens.refresh_token,
-    },
-    create: {
-      clerkId: userId,
-      email: '',
-      googleAccessToken: tokens.access_token,
-      googleRefreshToken: tokens.refresh_token,
-    },
   })
+
+  if (existingUser) {
+    await prisma.user.update({
+      where: { clerkId: userId },
+      data: {
+        googleAccessToken: tokens.access_token,
+        googleRefreshToken: tokens.refresh_token,
+      },
+    })
+  } else {
+    await prisma.user.create({
+      data: {
+        clerkId: userId,
+        email: `${userId}@placeholder.com`,
+        googleAccessToken: tokens.access_token,
+        googleRefreshToken: tokens.refresh_token,
+      },
+    })
+  }
 
   return NextResponse.redirect('https://48drdq-3000.csb.app/dashboard')
 }

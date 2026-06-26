@@ -22,6 +22,9 @@ export async function POST(request: NextRequest) {
 
     const text = `${platform.draft.postTitle}\n\n${platform.caption}\n\n${platform.hashtags}`
 
+    console.log('LinkedIn User ID:', user.linkedinUserId)
+    console.log('Posting text:', text)
+
     const res = await fetch('https://api.linkedin.com/v2/ugcPosts', {
       method: 'POST',
       headers: {
@@ -45,6 +48,7 @@ export async function POST(request: NextRequest) {
     })
 
     const data = await res.json()
+    console.log('LinkedIn response:', JSON.stringify(data))
 
     if (!res.ok) {
       return NextResponse.json({ error: 'LinkedIn post failed', details: data }, { status: 400 })
@@ -62,6 +66,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data })
   } catch (err: any) {
+    console.error(err)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

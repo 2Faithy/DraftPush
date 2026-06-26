@@ -33,25 +33,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to get token', details: tokens }, { status: 400 })
   }
 
-  // Get LinkedIn member ID using the token introspection
-  const introspectRes = await fetch('https://www.linkedin.com/oauth/v2/introspectToken', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: process.env.LINKEDIN_CLIENT_ID!,
-      client_secret: process.env.LINKEDIN_CLIENT_SECRET!,
-      token: tokens.access_token,
-    }),
-  })
+  // Decode the id_token JWT to get the sub (LinkedIn member ID)
+  let linkedinUserId: string | null = null
+  if (tokens.id_token) {
+    const payload = JSON.parse(
+      Buffer.from(tokens.id_token.split('.')[1], 'base64').toString()
+    )
+    console.log('LinkedIn JWT payload:', JSON.stringify(payload))
+    linkedinUserId = payload.sub || null
+  }
 
-  const introspect = await introspectRes.json()
-  const linkedinUserId = introspect.sub || introspect.authorized_party
+  console.log('LinkedIn user ID:', linkedinUserId)
 
   await prisma.user.update({
     where: { clerkId: userId },
     data: {
       linkedinAccessToken: tokens.access_token,
-      linkedinUserId: linkedinUserId || 'pending',
+      linkedinUserId: linkedinUserId,
     },
   })
 

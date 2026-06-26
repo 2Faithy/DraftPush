@@ -39,7 +39,10 @@ export default async function DashboardPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <p className="text-sm text-gray-500 mb-3">LinkedIn</p>
             {linkedinConnected ? (
-              <p className="text-blue-600 font-medium">✓ Connected</p>
+              <div className="flex items-center gap-3">
+                <p className="text-blue-600 font-medium">✓ Connected</p>
+                <ConnectLinkedInButton label="Reconnect" />
+              </div>
             ) : (
               <ConnectLinkedInButton />
             )}

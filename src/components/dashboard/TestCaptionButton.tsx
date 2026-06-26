@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 export default function TestCaptionButton({ draftId }: { draftId: string }) {
-  const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +17,7 @@ export default function TestCaptionButton({ draftId }: { draftId: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
-      setResult(data);
+      window.location.reload();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -35,14 +34,7 @@ export default function TestCaptionButton({ draftId }: { draftId: string }) {
       >
         {loading ? "Generating..." : "Generate Captions"}
       </button>
-      {error && (
-        <p className="mt-2 text-sm text-red-500">{error}</p>
-      )}
-      {result && (
-        <pre className="mt-4 bg-gray-100 p-4 rounded-lg text-sm overflow-auto">
-          {JSON.stringify(result, null, 2)}
-        </pre>
-      )}
+      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
     </div>
   );
 }

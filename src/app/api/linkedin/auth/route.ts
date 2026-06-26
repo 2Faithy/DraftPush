@@ -5,7 +5,7 @@ export async function GET() {
     response_type: 'code',
     client_id: process.env.LINKEDIN_CLIENT_ID!,
     redirect_uri: process.env.LINKEDIN_REDIRECT_URI!,
-    scope: 'w_member_social',
+    scope: 'openid profile w_member_social',
   })
 
   const url = `https://www.linkedin.com/oauth/v2/authorization?${params}`

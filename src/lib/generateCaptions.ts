@@ -1,7 +1,8 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+})
 
 export interface PlatformCaption {
   platform: string
@@ -38,8 +39,13 @@ Respond ONLY with a JSON array, no markdown, no backticks:
   { "platform": "facebook", "caption": "...", "hashtags": "" }
 ]`
 
-  const result = await model.generateContent(prompt)
-  const text = result.response.text()
+  const response = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.7,
+  })
+
+  const text = response.choices[0].message.content || ''
   const clean = text.replace(/```json|```/g, '').trim()
   return JSON.parse(clean)
 }
