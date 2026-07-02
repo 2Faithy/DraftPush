@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
           draftId: draft.id,
           name: cap.platform,
           caption: cap.caption,
-          hashtags: cap.hashtags,
+          hashtags: cap.hashtags || "",
         },
       })
     }

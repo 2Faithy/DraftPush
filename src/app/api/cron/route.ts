@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
                 draftId: draft.id,
                 name: cap.platform,
                 caption: cap.caption,
-                hashtags: cap.hashtags,
+                hashtags: cap.hashtags || "",
               },
             })
           }
@@ -269,3 +269,4 @@ export async function GET(request: NextRequest) {
     failed: totalFailed,
   })
 }
+// This is just a comment to trigger recompile
