@@ -6,6 +6,7 @@ import ConnectDriveButton from "@/components/dashboard/ConnectDriveButton";
 import ConnectLinkedInButton from "@/components/dashboard/ConnectLinkedInButton";
 import TestCaptionButton from "@/components/dashboard/TestCaptionButton";
 import PostToLinkedInButton from "@/components/dashboard/PostToLinkedInButton";
+import ScanDriveButton from "@/components/dashboard/ScanDriveButton";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
-    include: { drafts: { include: { platforms: true } } },
+    include: { drafts: { include: { platforms: true }, orderBy: { publishDate: 'asc' } } },
   });
 
   const driveConnected = !!user?.googleAccessToken;
@@ -27,11 +28,14 @@ export default async function DashboardPage() {
           <UserButton afterSignOutUrl="/" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <p className="text-sm text-gray-500 mb-3">Google Drive</p>
             {driveConnected ? (
-              <p className="text-green-600 font-medium">✓ Connected</p>
+              <div className="space-y-3">
+                <p className="text-green-600 font-medium">✓ Connected</p>
+                <ScanDriveButton />
+              </div>
             ) : (
               <ConnectDriveButton />
             )}
@@ -50,17 +54,31 @@ export default async function DashboardPage() {
         </div>
 
         <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-800">Your Drafts</h2>
+          {!user?.drafts.length && (
+            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+              <p className="text-gray-500">No drafts yet.</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Add <span className="font-mono bg-gray-100 px-1 rounded">✅ Title — Date</span> to a Google Doc and click Scan Drive.
+              </p>
+            </div>
+          )}
           {user?.drafts.map((draft) => (
             <div key={draft.id} className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-semibold text-gray-900">{draft.postTitle}</h3>
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{draft.status}</span>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  draft.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' :
+                  draft.status === 'FAILED' ? 'bg-red-100 text-red-700' :
+                  draft.status === 'AI_GENERATED' ? 'bg-blue-100 text-blue-700' :
+                  'bg-gray-100 text-gray-600'
+                }`}>{draft.status}</span>
               </div>
               <p className="text-sm text-gray-500 mb-1">
-                Publish: {new Date(draft.publishDate).toDateString()}
+                📅 {new Date(draft.publishDate).toDateString()}
               </p>
               {draft.userCaption && (
-                <p className="text-sm text-gray-600 mb-2">Caption: {draft.userCaption}</p>
+                <p className="text-sm text-gray-600 mb-3">"{draft.userCaption}"</p>
               )}
               {draft.platforms.length === 0 && (
                 <TestCaptionButton draftId={draft.id} />
@@ -71,12 +89,12 @@ export default async function DashboardPage() {
                     <div key={p.id} className="bg-gray-50 rounded-lg p-3">
                       <p className="text-xs font-semibold text-gray-500 uppercase mb-1">{p.name}</p>
                       <p className="text-sm text-gray-700">{p.caption}</p>
-                      <p className="text-xs text-blue-500 mt-1">{p.hashtags}</p>
+                      {p.hashtags && <p className="text-xs text-blue-500 mt-1">{p.hashtags}</p>}
                       {p.name === 'linkedin' && linkedinConnected && !p.publishedAt && (
                         <PostToLinkedInButton platformId={p.id} />
                       )}
                       {p.publishedAt && (
-                        <p className="text-xs text-green-500 mt-1">✓ Published</p>
+                        <p className="text-xs text-green-500 mt-2">✓ Published {new Date(p.publishedAt).toLocaleDateString()}</p>
                       )}
                     </div>
                   ))}
